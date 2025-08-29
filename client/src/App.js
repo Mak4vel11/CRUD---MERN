@@ -12,24 +12,47 @@ function App() {
   const [days, setDays] = useState(0)
 
   const [foodList, setFoodList] = useState([])
+
+ const [newFoodName, setNewFoodName] = useState("")
+
   useEffect(() => {
-    axios.get('http://localhost:3001/read').then((response) => {
+     axios.get('http://localhost:3001/read').then((response) => {        
       setFoodList(response.data)
     })
   }, [])
 
-  const addToList = () => {
-  axios.post("http://localhost:3001/insert", {
-    foodName: foodName, 
+  const updateFood = (id) => {
+    axios.put("http://localhost:3001/update",{
+       id: id,
+        newFoodName: newFoodName
+      })
+      .then(() => {
+        axios.get('http//localhost:3001/read')
+          .then((response) => setFoodList(response.data))
+          .catch(err => console.error(err))
+      })
+  }
+
+    const deleteFood = (id) => {
+    axios.delete(`http://localhost:3001/delete/${id}`)
+    .then(() => {
+      axios.get('http//localhost:3001/read')
+     
+       .then((response) => setFoodList(response.data))
+          .catch(err => console.error(err))
+    })
+  }
+ 
+
+ const addToList = () => {
+  axios.post('http://localhost:3001/insert', {
+    foodName: foodName,
     days: days
   })
   .then(() => {
-    alert("data eshte insertuar me sukses")
+    axios.get('http://localhost:3001/read').then((response) => setFoodList(response.data))
   })
-  .catch((err) => {
-    console.error(err)
-  })
-}
+ }
 
   return (
     <div className="App">
@@ -52,6 +75,13 @@ function App() {
         <div key={key}> 
           <h1>{val.foodName}</h1>
           <h1>{val.daySinceIEat}</h1>{" "}
+          <input
+          onChange={(event) => {
+            setNewFoodName(event.target.value)
+           }}
+          type='text' placeholder='New Food Name '/>
+          <button onClick={() => updateFood(val._id)}>UPDATE</button>
+          <button onClick={() => deleteFood(val._id)}>DELETE</button>
         </div>
        )
       })}

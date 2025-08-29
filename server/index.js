@@ -22,7 +22,7 @@ app.post('/insert', async (req, res) => {
     
     const foodName = req.body.foodName
     const days = req.body.days 
-    const food = new FoodModel({foodName: foodName, daySinceIEat: days})
+    const food = new FoodModel({foodName: foodName, days: days})
 
    try {
     await food.save();
@@ -40,6 +40,36 @@ app.get('/read', async (req, res) => {
     res.status(500).send(error);
   }
 });
+
+app.put('/update', async (req, res) => {
+    
+    const newFoodName = req.body.newFoodName
+    const id = req.body.id 
+
+    try {
+        
+        const updatedFood = await FoodModel.findByIdAndUpdate(
+            id,
+            { foodName: newFoodName },
+            { new: true }
+        );
+
+        if (!updatedFood) return res.status(404).send("Food not found");
+        res.send(updatedFood);
+    } catch (err) {
+        console.log(err);
+        res.status(500).send(err);
+    }
+})
+
+
+app.delete('/delete/:id', async(req, res) => {
+  const id = req.params.id
+  
+
+  await FoodModel.findByIdAndDelete(id).exec()
+  res.send('deleted')
+})
 
 
 app.listen(3001, () => {
